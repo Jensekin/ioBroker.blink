@@ -1,10 +1,10 @@
 {
   "name": "iobroker.blink",
   "version": "0.0.1",
-  "description": "Blink for Home Securit Camera System",
+  "description": "Blink for Home Security Camera System",
   "author": {
     "name": "Jensekin",
-    "email": "j.mehlhose@me.com"
+    
   },
   "homepage": "https://github.com/Jensekin/ioBroker.blink",
   "license": "MIT",
