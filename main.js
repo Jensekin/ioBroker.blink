@@ -53,71 +53,47 @@ class Blink extends utils.Adapter {
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 	this.blinkapi.setupSystem().then(() => {
-		this.log.debug('found networkId: '+this.blinkapi.networkId);
-		this.setObject(this.blinkapi.networkId, {
-		   type: 'state',
- 	           common: {
-        	        name: this.blinkapi.networkId,
-                	type: 'string',
-     	           	role: 'indicator',
-        	        read: true,
-                	write: false,
-          	  },
-     		  native: {},
-		});
-		this.blinkapi.getCameras().then((cameras) => {
-		   Object.entries(cameras).forEach( (camera) => {
-		       this.log.debug('found camera: id='+camera[0]+' name:'+camera[1]._name);
-			   
-                       this.setObject(this.blinkapi.networkId+'.'+camera[1]._name, { 
-		           _id: camera[1]._id,
-                           type: 'device',
-                           common: {
-                               name: camera[1]._name,
-                               type: 'boolean',
-                               role: 'indicator',
-                               read: true,
-                               write: false,
-                           },
-                           native: {},
-                       });
-		       Object.entries(camera[1]).forEach( (camAttr) => {
-			   this.log.debug('value for '+camAttr[0]+': '+JSON.stringify(camAttr[1]));
-			   var value = null;
-			   if( camAttr[1] !== null && typeof camAttr[1]  !== "object"){
-				var value = camAttr[1];
-                           }
-			       this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0], {
-                                   type: 'state',
-                                   common: {
-                                       name: camAttr[0],
-                                       type: 'string',
-                                       role: 'indicator',
-                                       read: true,
-                                       write: false,
-                                   },
-                                   native: {},
-                               });
-			       this.setState(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0], value, true);
-                           if(camAttr[1] !== null && typeof camAttr[1]  === "object"){
-                                Object.entries(camAttr[1]).forEach( (camSubAttr) => {
-				   this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0]+'.'+camSubAttr[0], {
-                                      type: 'state',
-                                      common: {
-                                          name: camSubAttr[0],
-                                          type: 'string',
-                                          role: 'indicator',
-                                          read: true,
-                                          write: false,
-                                      },
-                                      native: {},
-                                    }); //setObject(subCamAttr)
-				    this.setState(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0]+'.'+camSubAttr[0], camSubAttr[1], true);
-				}); //entries(camAttr)
-                           }; //if camAttr === object
-		        }); //entries(camera)
-                    }); // entries(cameras)
-		}); //getCameras
+		this.blinkapi.getSummary().then((summary) => {
+		   this.log.info('found networkId: '+this.blinkapi.networkId+' Name:'+summary.network.name);
+		   Object.entries(summary.network).forEach( (networkAttr) => {
+		       this.log.info('found :'+JSON.stringify(networkAttr)); 
+                       var key = networkAttr[0];
+		       var val = networkAttr[1];
+		           this.setObject(summary.network.name+'.'+key, {
+                               type: 'state',
+                               common: {
+                                    name: key,
+                                    type: typeof val,
+                                    role: 'indicator',
+                                    read: true,
+                                    write: false,
+                               },
+                               native: {},
+                           });
+                           this.setState(summary.network.name+'.'+key, val, true);
+		     });
+	     this.log.info(summary.devices);
+	             summary.devices.forEach((device) => {
+	                 this.log.info('found device: '+device.name);
+		         Object.entries(device).forEach( (deviceAttr) => {
+		             var key = deviceAttr[0];
+			     var val = deviceAttr[1];
+		             this.log.info('setting value '+key+': '+val);
+			     this.setObject(summary.network.name+'.'+device.name+'.'+key, {
+                                 type: 'state',
+                                 common: {
+                                     name: key,
+                                     type: typeof val,
+                                     role: 'indicator',
+                                     read: true,
+                                     write: false,
+                                 },
+                                 native: {},
+                              });
+                              this.setState(summary.network.name+'.'+device.name+'.'+key, val, true);
+			  })
+		       })
+	            })
 	    },function(error){
 	        this.log.error(error);
 	    })
@@ -128,21 +104,21 @@ class Blink extends utils.Adapter {
         you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
         */
         // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
+//        await this.setStateAsync('testVariable', true);
 
         // same thing, but the value is flagged "ack"
         // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
+//        await this.setStateAsync('testVariable', { val: true, ack: true });
 
         // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
+//        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
 
         // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
+ //       let result = await this.checkPasswordAsync('admin', 'iobroker');
+ //       this.log.info('check user admin pw iobroker: ' + result);
 
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+//        result = await this.checkGroupAsync('admin', 'admin');
+//        this.log.info('check group user admin group admin: ' + result);
     }
 
     /**
