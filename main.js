@@ -39,9 +39,9 @@ class Blink extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.info('config URL: ' + this.config.url);
-        this.log.info('config Username: ' + this.config.username);
-        this.log.info('config Password: ' + this.config.password);
+        this.log.debug('config URL: ' + this.config.url);
+        this.log.debug('config Username: ' + this.config.username);
+        this.log.debug('config Password: ' + this.config.password);
 
         /*
         For every state in the system there has to be also an object of type state
@@ -53,7 +53,7 @@ class Blink extends utils.Adapter {
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 	this.blinkapi.setupSystem().then(() => {
-		this.log.info('found networkId: '+this.blinkapi.networkId);
+		this.log.debug('found networkId: '+this.blinkapi.networkId);
 		this.setObject(this.blinkapi.networkId, {
 		   type: 'state',
  	           common: {
@@ -67,7 +67,7 @@ class Blink extends utils.Adapter {
 		});
 		this.blinkapi.getCameras().then((cameras) => {
 		   Object.entries(cameras).forEach( (camera) => {
-		       this.log.info('found camera: id='+camera[0]+' name:'+camera[1]._name);
+		       this.log.debug('found camera: id='+camera[0]+' name:'+camera[1]._name);
 			   
                        this.setObject(this.blinkapi.networkId+'.'+camera[1]._name, { 
 		           _id: camera[1]._id,
@@ -82,11 +82,11 @@ class Blink extends utils.Adapter {
                            native: {},
                        });
 		       Object.entries(camera[1]).forEach( (camAttr) => {
-			   this.log.info('value for '+camAttr[0]+': '+JSON.stringify(camAttr[1]));
-			   if(typeof camAttr[1]  !== "object"){
-				value = camAttr[1];
+			   this.log.debug('value for '+camAttr[0]+': '+JSON.stringify(camAttr[1]));
+			   var value = null;
+			   if( camAttr[1] !== null && typeof camAttr[1]  !== "object"){
+				var value = camAttr[1];
                            }
-			       this.log.info('hier2');
 			       this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0], {
                                    type: 'state',
                                    common: {
@@ -95,11 +95,11 @@ class Blink extends utils.Adapter {
                                        role: 'indicator',
                                        read: true,
                                        write: false,
-				       value: value,
                                    },
                                    native: {},
                                });
-                           if(typeof camAttr[1]  === "object"){
+			       this.setState(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0], value, true);
+                           if(camAttr[1] !== null && typeof camAttr[1]  === "object"){
                                 Object.entries(camAttr[1]).forEach( (camSubAttr) => {
 				   this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0]+'.'+camSubAttr[0], {
                                       type: 'state',
@@ -109,15 +109,15 @@ class Blink extends utils.Adapter {
                                           role: 'indicator',
                                           read: true,
                                           write: false,
-                                          value: camSubAttr[1],
                                       },
                                       native: {},
-                                    }); 
-				});
-                           });
-		        });
-                    });
-		});
+                                    }); //setObject(subCamAttr)
+				    this.setState(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0]+'.'+camSubAttr[0], camSubAttr[1], true);
+				}); //entries(camAttr)
+                           }; //if camAttr === object
+		        }); //entries(camera)
+                    }); // entries(cameras)
+		}); //getCameras
 	    },function(error){
 	        this.log.error(error);
 	    })
@@ -139,7 +139,7 @@ class Blink extends utils.Adapter {
 
         // examples for the checkPassword/checkGroup functions
         let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw ioboker: ' + result);
+        this.log.info('check user admin pw iobroker: ' + result);
 
         result = await this.checkGroupAsync('admin', 'admin');
         this.log.info('check group user admin group admin: ' + result);
