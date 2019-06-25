@@ -19,27 +19,27 @@
         "title": "Blink Camera",
         "titleLang": {
             "en": "Blink Camera",
-            "de": "Kamera blinken",
+            "de": "Adapter für das Blink for Home Security Camera System",
             "ru": "Blink Camera",
             "pt": "Blink Camera",
-            "nl": "Knipperen camera",
-            "fr": "Caméra clignotante",
-            "it": "Fotocamera Blink",
-            "es": "Cámara de parpadeo",
-            "pl": "Miga aparat",
-            "zh-cn": "眨眼相机"
+            "nl": "Blink Camera",
+            "fr": "Blink Camera",
+            "it": "Blink Camera",
+            "es": "Blink Camera",
+            "pl": "Blink Camera",
+            "zh-cn": "Blink Camera"
         },
         "desc": {
-            "en": "Blink for Home Securit Camera System",
-            "de": "Blinklicht für das Home Securit-Kamerasystem",
-            "ru": "Blink для системы камер Home Securit",
-            "pt": "Blink para Sistema de Câmera Home Securit",
-            "nl": "Knipperen voor Home Securit camerasysteem",
-            "fr": "Blink pour le système de caméra Home Securit",
-            "it": "Blink for Home Securit Camera System",
-            "es": "Blink para el sistema de cámara Home Securit",
-            "pl": "Blink for Home Securit Camera System",
-            "zh-cn": "家庭安全摄像系统闪烁"
+            "en": "Blink for Home Security Camera System",
+            "de": "Blink for Home Security Camera System",
+            "ru": "Blink for Home Security Camera System",
+            "pt": "Blink for Home Security Camera System",
+            "nl": "Blink for Home Security Camera System",
+            "fr": "Blink for Home Security Camera System",
+            "it": "Blink for Home Security Camera System",
+            "es": "Blink for Home Security Camera System",
+            "pl": "Blink for Home Security Camera System",
+            "zh-cn": "Blink for Home Security Camera System"
         },
         "authors": [
             "Jensekin"
