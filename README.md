@@ -12,7 +12,7 @@
 
 ## blink adapter for ioBroker
 
-Blink for Home Securit Camera System
+Blink for Home Security Camera System
 
 ## Developer manual
 This section is intended for the developer. It can be deleted later
