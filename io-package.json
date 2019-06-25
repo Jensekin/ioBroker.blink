@@ -1,0 +1,74 @@
+{
+    "common": {
+        "name": "blink",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "Blink Camera",
+        "titleLang": {
+            "en": "Blink Camera",
+            "de": "Kamera blinken",
+            "ru": "Blink Camera",
+            "pt": "Blink Camera",
+            "nl": "Knipperen camera",
+            "fr": "Caméra clignotante",
+            "it": "Fotocamera Blink",
+            "es": "Cámara de parpadeo",
+            "pl": "Miga aparat",
+            "zh-cn": "眨眼相机"
+        },
+        "desc": {
+            "en": "Blink for Home Securit Camera System",
+            "de": "Blinklicht für das Home Securit-Kamerasystem",
+            "ru": "Blink для системы камер Home Securit",
+            "pt": "Blink para Sistema de Câmera Home Securit",
+            "nl": "Knipperen voor Home Securit camerasysteem",
+            "fr": "Blink pour le système de caméra Home Securit",
+            "it": "Blink for Home Securit Camera System",
+            "es": "Blink para el sistema de cámara Home Securit",
+            "pl": "Blink for Home Securit Camera System",
+            "zh-cn": "家庭安全摄像系统闪烁"
+        },
+        "authors": [
+            "Jensekin <j.mehlhose@me.com>"
+        ],
+        "keywords": [
+            "blink for home"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "blink.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/Jensekin/ioBroker.blink/master/admin/blink.png",
+        "readme": "https://github.com/Jensekin/ioBroker.blink/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "alarm",
+        "compact": true,
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=1.4.2"
+            }
+        ]
+    },
+    "native": {
+        "option1": true,
+        "option2": "42"
+    },
+    "objects": [],
+    "instanceObjects": []
+}
