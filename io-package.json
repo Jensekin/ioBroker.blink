@@ -66,8 +66,9 @@
         ]
     },
     "native": {
-        "option1": true,
-        "option2": "42"
+        "url": "https://rest.prde.immedia-semi.com/",
+	"username": "",
+	"password": ""
     },
     "objects": [],
     "instanceObjects": []
