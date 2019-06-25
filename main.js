@@ -7,6 +7,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require('@iobroker/adapter-core');
+const blinkclass = require('node-blink-security');
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -28,6 +29,8 @@ class Blink extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
     }
 
+
+
     /**
      * Is called when databases are connected and adapter received configuration.
      */
@@ -45,20 +48,80 @@ class Blink extends utils.Adapter {
         Here a simple template for a boolean variable named "testVariable"
         Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
         */
-        await this.setObjectAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
+	this.blinkapi = new blinkclass(this.config.username, this.config.password);
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
+	this.blinkapi.setupSystem().then(() => {
+		this.log.info('found networkId: '+this.blinkapi.networkId);
+		this.setObject(this.blinkapi.networkId, {
+		   type: 'state',
+ 	           common: {
+        	        name: this.blinkapi.networkId,
+                	type: 'string',
+     	           	role: 'indicator',
+        	        read: true,
+                	write: false,
+          	  },
+     		  native: {},
+		});
+		this.blinkapi.getCameras().then((cameras) => {
+		   Object.entries(cameras).forEach( (camera) => {
+		       this.log.info('found camera: id='+camera[0]+' name:'+camera[1]._name);
+			   
+                       this.setObject(this.blinkapi.networkId+'.'+camera[1]._name, { 
+		           _id: camera[1]._id,
+                           type: 'device',
+                           common: {
+                               name: camera[1]._name,
+                               type: 'boolean',
+                               role: 'indicator',
+                               read: true,
+                               write: false,
+                           },
+                           native: {},
+                       });
+		       Object.entries(camera[1]).forEach( (camAttr) => {
+			   this.log.info('value for '+camAttr[0]+': '+JSON.stringify(camAttr[1]));
+			   if(typeof camAttr[1]  !== "object"){
+				value = camAttr[1];
+                           }
+			       this.log.info('hier2');
+			       this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0], {
+                                   type: 'state',
+                                   common: {
+                                       name: camAttr[0],
+                                       type: 'string',
+                                       role: 'indicator',
+                                       read: true,
+                                       write: false,
+				       value: value,
+                                   },
+                                   native: {},
+                               });
+                           if(typeof camAttr[1]  === "object"){
+                                Object.entries(camAttr[1]).forEach( (camSubAttr) => {
+				   this.setObject(this.blinkapi.networkId+'.'+camera[1]._name+'.'+camAttr[0]+'.'+camSubAttr[0], {
+                                      type: 'state',
+                                      common: {
+                                          name: camSubAttr[0],
+                                          type: 'string',
+                                          role: 'indicator',
+                                          read: true,
+                                          write: false,
+                                          value: camSubAttr[1],
+                                      },
+                                      native: {},
+                                    }); 
+				});
+                           });
+		        });
+                    });
+		});
+	    },function(error){
+	        this.log.error(error);
+	    })
+	
 
         /*
         setState examples
