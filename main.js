@@ -61,6 +61,7 @@ class Blink extends utils.Adapter {
 		       var val = networkAttr[1];
 		           this.setObject(summary.network.name+'.'+key, {
                                type: 'state',
+			       parent: summary.network.name,
                                common: {
                                     name: key,
                                     type: typeof val,
@@ -81,6 +82,7 @@ class Blink extends utils.Adapter {
 		             this.log.info('setting value '+key+': '+val);
 			     this.setObject(summary.network.name+'.'+device.name+'.'+key, {
                                  type: 'state',
+				 parent: summary.network.name+'.'+device.name,
                                  common: {
                                      name: key,
                                      type: typeof val,
