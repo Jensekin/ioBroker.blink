@@ -168,8 +168,25 @@ class Blink extends utils.Adapter {
     onStateChange(id, state) {
         if (state) {
             // The state was changed
-            if(state.ack === false){
-                this.log.info(`state ${id} was changed from outside to: ${state.val} (ack = ${state.ack})`);
+            if(state.ack === true){
+                return;
+	    }
+	    this.log.info(`state ${id} was changed from outside to: ${state.val}`);
+	    var idsplit = id.split('.');
+	    var statename = idsplit[idsplit.length-1];
+	    if(idsplit.length == 4 && statename == 'armed'){
+		var networkname = idsplit[idsplit.length-2];
+		if(state.val === true) {
+		    var statetext = 'armed'
+                } else {
+		    var statetext = 'disarmed'
+		}
+		this.log.info('someone '+statetext+' ('+state.val+') the network '+networkname);
+		this.blinkapi.setupSystem(networkname).then(() => {
+		    this.blinkapi.setArmed(state.val);
+		},function(error){
+                    this.log.error(error);
+                })
 	    }
         } else {
             // The state was deleted
