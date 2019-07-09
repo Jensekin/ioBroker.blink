@@ -29,7 +29,87 @@ class Blink extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
     }
 
+    createStateObjectsFromSummary(summary){
+	this.log.info("start creating objects");
+	const promises = [];
+	Object.entries(summary.network).forEach( (networkAttr) => {
+	    var key = networkAttr[0];
+	    var val = networkAttr[1];
+	    this.log.info("creating network object "+summary.network.name+'.'+key);
+	    promises.push(this.setObjectNotExistsAsync(summary.network.name+'.'+key, {
+                type: 'state',
+                common: {
+                    name: key,
+                    type: typeof val,
+                    role: 'indicator',
+                    read: true,
+                    write: false
+                },
+                native: {
+                    id: summary.network.name+'.'+key
+                }
+            }));
+	});
+	summary.devices.forEach( (device) => {
+	    Object.entries(device).forEach( (deviceAttr) => {
+                var key = deviceAttr[0];
+                var val = deviceAttr[1];
+		promises.push(this.setObjectNotExistsAsync(summary.network.name+'.'+device.name+'.'+key, {
+                    type: 'state',
+                    common: {
+                        name: key,
+                        type: typeof val,
+                        role: 'indicator',
+                        read: true,
+                        write: false
+                    },
+                    native: {
+                        id: summary.network.name+'.'+device.name+'.'+key
+                    }
+                 }));
+	    });
+	});
+	return promises;
+    }
 
+    updateStatesFromSummary(summary){
+        Object.entries(summary.network).forEach( (networkAttr) => {
+	    var key = networkAttr[0];
+            var val = networkAttr[1];
+            this.setState(summary.network.name+'.'+key, val, true);
+        });
+        summary.devices.forEach( (device) => {
+            Object.entries(device).forEach( (deviceAttr) => {
+                var key = deviceAttr[0];
+                var val = deviceAttr[1];
+		this.setState(summary.network.name+'.'+device.name+'.'+key, val, true);
+            });
+	})
+    }
+
+    pollStatusFromBlinkServers(scope, intsecs){
+	scope.log.info("start polling from server. interval " + intsecs + " seconds.");
+	scope.blinkapi.setupSystem().then(() => {
+	    scope.log.info("connection set up");
+            scope.blinkapi.getSummary().then((summary) => {
+		scope.log.info("processing summary");
+		let promises = scope.createStateObjectsFromSummary(summary);
+		Promise.all(promises).then(() => {
+                    scope.log.info("update states from summary");
+		    scope.updateStatesFromSummary(summary);
+	            scope.log.info("updated states, setting timer in "+intsecs+" seconds");
+	            setTimeout(scope.pollStatusFromBlinkServers, intsecs * 1000, scope, intsecs);
+		    scope.log.info("timer set, all is done");
+	        }).catch((err) => {
+		    scope.log.error("error: " + err);
+		    //this.timeout = setTimeout(pollStatusFromBlinkServers(interval), interval * 60000);
+		});
+	    },function(error){
+	        scope.log.error(error);
+		//this.timeout = setTimeout(pollStatusFromBlinkServers(interval), interval * 60000);
+	    })
+	})
+    }
 
     /**
      * Is called when databases are connected and adapter received configuration.
@@ -39,86 +119,17 @@ class Blink extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.debug('config URL: ' + this.config.url);
-        this.log.debug('config Username: ' + this.config.username);
-        this.log.debug('config Password: ' + this.config.password);
+        this.log.info('config URL: ' + this.config.url);
+        this.log.info('config Username: ' + this.config.username);
+        this.log.info('config Password: ' + this.config.password);
+	this.log.info('config Interval: ' + this.config.interval);
 
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
 	this.blinkapi = new blinkclass(this.config.username, this.config.password);
 	this._authtoken = '';
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
-	this.blinkapi.setupSystem().then(() => {
-		this.blinkapi.getSummary().then((summary) => {
-		   this.log.debug('found networkId: '+this.blinkapi.networkId+' Name:'+summary.network.name);
-		   Object.entries(summary.network).forEach( (networkAttr) => {
-		       this.log.info('found :'+JSON.stringify(networkAttr)); 
-                       var key = networkAttr[0];
-		       var val = networkAttr[1];
-		           this.setObject(summary.network.name+'.'+key, {
-                               type: 'state',
-                               common: {
-                                    name: key,
-                                    type: typeof val,
-                                    role: 'indicator',
-                                    read: true,
-                                    write: false,
-                               },
-                               native: {},
-                           });
-                           this.setState(summary.network.name+'.'+key, val, true);
-		     });
-	             summary.devices.forEach((device) => {
-	                 this.log.debug('found device: '+device.name);
-		         Object.entries(device).forEach( (deviceAttr) => {
-		             var key = deviceAttr[0];
-			     var val = deviceAttr[1];
-		             this.log.debug('setting value '+key+': '+val);
-			     this.setObject(summary.network.name+'.'+device.name+'.'+key, {
-                                 type: 'state',
-                                 common: {
-                                     name: key,
-                                     type: typeof val,
-                                     role: 'indicator',
-                                     read: true,
-                                     write: false,
-                                 },
-                                 native: {},
-                              });
-                              this.setState(summary.network.name+'.'+device.name+'.'+key, val, true);
-			  })
-		       })
-	            })
-	    },function(error){
-	        this.log.error(error);
-	    })
-	
-
-        /*
-        setState examples
-        you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-//        await this.setStateAsync('testVariable', true);
-
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-//        await this.setStateAsync('testVariable', { val: true, ack: true });
-
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-//        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
-
-        // examples for the checkPassword/checkGroup functions
- //       let result = await this.checkPasswordAsync('admin', 'iobroker');
- //       this.log.info('check user admin pw iobroker: ' + result);
-
-//        result = await this.checkGroupAsync('admin', 'admin');
-//        this.log.info('check group user admin group admin: ' + result);
+        this.pollStatusFromBlinkServers(this, this.config.interval);
     }
 
     /**
@@ -157,7 +168,9 @@ class Blink extends utils.Adapter {
     onStateChange(id, state) {
         if (state) {
             // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+            if(state.ack === false){
+                this.log.info(`state ${id} was changed from outside to: ${state.val} (ack = ${state.ack})`);
+	    }
         } else {
             // The state was deleted
             this.log.info(`state ${id} deleted`);
