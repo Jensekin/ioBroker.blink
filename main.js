@@ -49,12 +49,13 @@ class Blink extends utils.Adapter {
         Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
         */
 	this.blinkapi = new blinkclass(this.config.username, this.config.password);
+	this._authtoken = '';
 
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 	this.blinkapi.setupSystem().then(() => {
 		this.blinkapi.getSummary().then((summary) => {
-		   this.log.info('found networkId: '+this.blinkapi.networkId+' Name:'+summary.network.name);
+		   this.log.debug('found networkId: '+this.blinkapi.networkId+' Name:'+summary.network.name);
 		   Object.entries(summary.network).forEach( (networkAttr) => {
 		       this.log.info('found :'+JSON.stringify(networkAttr)); 
                        var key = networkAttr[0];
@@ -72,13 +73,12 @@ class Blink extends utils.Adapter {
                            });
                            this.setState(summary.network.name+'.'+key, val, true);
 		     });
-	     this.log.info(summary.devices);
 	             summary.devices.forEach((device) => {
-	                 this.log.info('found device: '+device.name);
+	                 this.log.debug('found device: '+device.name);
 		         Object.entries(device).forEach( (deviceAttr) => {
 		             var key = deviceAttr[0];
 			     var val = deviceAttr[1];
-		             this.log.info('setting value '+key+': '+val);
+		             this.log.debug('setting value '+key+': '+val);
 			     this.setObject(summary.network.name+'.'+device.name+'.'+key, {
                                  type: 'state',
                                  common: {
