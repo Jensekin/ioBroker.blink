@@ -102,11 +102,11 @@ class Blink extends utils.Adapter {
 		    scope.log.info("timer set, all is done");
 	        }).catch((err) => {
 		    scope.log.error("error: " + err);
-		    //this.timeout = setTimeout(pollStatusFromBlinkServers(interval), interval * 60000);
+		    setTimeout(scope.pollStatusFromBlinkServers, intsecs * 1000, scope, intsecs);
 		});
 	    },function(error){
 	        scope.log.error(error);
-		//this.timeout = setTimeout(pollStatusFromBlinkServers(interval), interval * 60000);
+		setTimeout(scope.pollStatusFromBlinkServers, intsecs * 1000, scope, intsecs);
 	    })
 	})
     }
